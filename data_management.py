@@ -1,38 +1,41 @@
-import pandas as pd
-import numpy as np
-import os
-import pickle
+from os import stat
+from sklearn.preprocessing import OneHotEncoder
+from scipy import stats
 
-root_path = "WESAD"
-zip_label = "_E4_Data.zip"
-E4_label = "_E4_Data"
+from fetch_data import input_chest_data, pacient_state
 
-subjects_available = os.listdir(root_path)
+pacient_state_list  = [[state, pacient_state[state]] for state in pacient_state]
 
-def get_input_chest_data(subjects_list, body_signal):
-    
-    chest_df_list = []
-    
-    for subject in subjects_list:
-        
-        pkl_path = os.path.join(root_path, subject, subject + ".pkl")
-        f=open(pkl_path,'rb')
-        data=pickle.load(f,encoding='latin1')
-        
-        index_df = [i for i in range(1, len(data["label"]) + 1)]
-        chest_data = {
-            body_signal: data["signal"]["chest"][body_signal].reshape(len(data["signal"]["chest"][body_signal]),), 
-            "label": data["label"],
-            "subject": data["subject"]
-        }
-        
-        chest_df_list.append(pd.DataFrame(chest_data, index = index_df))
-        
-    return chest_df_list
+enc = OneHotEncoder(handle_unknown="ignore")
+enc.fit(pacient_state_list)
 
-input_chest_data = get_input_chest_data(subjects_available, "EDA")
+clean_chest_data = []
+
+for data in input_chest_data: 
+
+    # appling One Hot Enconding in the labels
+
+    aux_label = data.pop("label").to_numpy()
+    aux_label_id = data.pop("label_id").to_numpy()
+
+    aux = [[aux_label[i], aux_label_id[i]] for i in range(len(data))]
+
+    target = enc.transform(aux).toarray()
+
+    # normalizing data
+
+    subject_label = data.pop("subject").to_numpy()[0]
+
+    normalized_data = stats.zscore(data.to_numpy())
+
+    # Tuple (input_data, target_data, subject_label)
+
+    clean_chest_data.append((normalized_data, target, subject_label))
+
 
 if __name__ == "__main__": 
 
-    print(len(input_chest_data))
-    print(input_chest_data[0])
+    print(target)
+    print(subject_label)
+    print(normalized_data)
+    print(clean_chest_data[0])
