@@ -36,6 +36,6 @@ for data in input_chest_data:
 if __name__ == "__main__": 
 
     print(target)
-    print(subject_label)
-    print(normalized_data)
+    print(type(target))
     print(clean_chest_data[0])
+    print(clean_chest_data[0][0].shape)

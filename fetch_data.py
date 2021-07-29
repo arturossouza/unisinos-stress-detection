@@ -38,7 +38,7 @@ def get_input_chest_data(subjects_list, body_signal):
             "label": [pacient_state[i]  for i in data["label"] ]
         }
         
-        chest_df_list.append(pd.DataFrame(chest_data, index = index_df))
+        chest_df_list.append(pd.DataFrame(chest_data, index = index_df)[::700])
         
     return chest_df_list
 
