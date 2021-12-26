@@ -5,3 +5,5 @@ python_files
 .vscode
 wesad_readme.pdf
 softmax.png
+trainning_data.pickle
+validation_data.pickle
